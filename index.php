@@ -1,6 +1,5 @@
 <?php
 
-session_start();
 $connection = new PDO('mysql:host=localhost; dbname=site;
 charset=utf8', 'root', 'root');
 
@@ -15,14 +14,15 @@ function generateRandomString() {
 
 
 if ($_POST['login']) {
-    $newName = $_POST['name'];
-    $newSurname = $_POST['surname'];
-    $newYear = $_POST['year'];
-    $newCity = $_POST['city'];
-    $newEmail = $_POST['email'];
-    $newLogin = $_POST['login'];
-    $newPassword = $_POST['password'];
+    $newName = htmlspecialchars($_POST['name']);
+    $newSurname = htmlspecialchars($_POST['surname']);
+    $newYear = htmlspecialchars($_POST['year']);
+    $newCity = htmlspecialchars($_POST['city']);
+    $newEmail = htmlspecialchars($_POST['email']);
+    $newLogin = htmlspecialchars($_POST['login']);
+    $newPassword = htmlspecialchars($_POST['password']);
     $authKey = generateRandomString();
+
 
 
     $login = $connection->query("INSERT INTO login (name, surname, year, city, email, auth_key, login, password) 
@@ -60,15 +60,18 @@ if ($_GET['auth']) {
         $connection->query("UPDATE login SET validate = true, updated_at = current_timestamp 
 WHERE auth_key = '$auth'");
         echo "<h2 style='color: green'>Ваша почта подтверждена. Войдите на сайт</h2>";
+
     }
 
+}
 
-
-if(isset($_GET['log'])) {
+if($_GET['log']) {
     header('Location: login.php');
 }
-}
+
+
 ?>
+
 
 <form action="" method="post">
     <h2>Регистрация</h2>
@@ -82,6 +85,8 @@ if(isset($_GET['log'])) {
     <input type="submit" value="Зарегестрироваться" style="color: blue">
     <h3>Уже зарегестрированы?</h3>
 </form>
-<form action="">
+<form method="get">
     <input type="submit" value="Войти" name="log">
 </form>
+
+

@@ -7,10 +7,10 @@ $login = $connection->query("SELECT * FROM login");
 
 if ($_POST['login']) {
     foreach ($login as $log) {
-        if ($_POST['login'] == $log['login'] and $_POST['password'] == $log['password']) {
-            $_SESSION['login'] = $_POST['login'];
-            $_SESSION['password'] = $_POST['password'];
-            header("Location: content.php");
+        if (htmlspecialchars($_POST['login']) == $log['login'] and htmlspecialchars($_POST['password']) == $log['password']) {
+            $_SESSION['login'] = htmlspecialchars($_POST['login']);
+            $_SESSION['password'] = htmlspecialchars($_POST['password']);
+            header("Location: forom.php");
         }
     }
 
