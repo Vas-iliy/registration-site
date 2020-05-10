@@ -13,16 +13,27 @@ $connection = new PDO('mysql:host=localhost; dbname=site;
 charset=utf8', 'root', 'root');
 $data = $connection->query("SELECT * FROM comments WHERE moderation = 'ok' ORDER BY date DESC ");
 
+
 if ($_POST) {
     $login = htmlspecialchars($_POST['login']);
     $comment = htmlspecialchars($_POST['comment']);
     $time = date("Y:m:d H:i:s");
-    $connection->query("INSERT INTO comments (login, comment,date) VALUES ('$login', '$comment', '$time')");
+
+    $search = $connection->query("SELECT login FROM login WHERE login = '1'");
+    $search = $search->fetch();
+    if ($search == true) {
+        $connection->query("INSERT INTO comments (login, comment,date) VALUES ('$login', '$comment', '$time')");
+    }
+        else {
+        echo "<h2 style='color: darkred'>Для отправки коментария введите свой логин</h2>";
+        die();
+        }
 
 }
 if ($_POST) {
     header("Location:forom.php");
 }
+
 ?>
 
 <style>
