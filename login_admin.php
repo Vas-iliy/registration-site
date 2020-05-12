@@ -12,6 +12,7 @@ if ($_POST['login']) {
             header("Location:admin.php");
         }
     }
+    echo 'Неверный логин или пароль';
 }
 
 ?>
