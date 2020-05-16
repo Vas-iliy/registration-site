@@ -14,56 +14,69 @@ $data = $connection->query("SELECT * FROM comments WHERE moderation = 'ok' ORDER
 
 //тут мы работаем с файлами
 if (isset($_POST['go'])) {
-    $fileName = $_FILES['file']['name'];
-    $fileType = $_FILES['file']['type'];
-    $fileTmp_name = $_FILES['file']['tmp_name'];
-    $fileError = $_FILES['file']['error'];
-    $fileSize = $_FILES['file']['size'];
-
-    //это массив, в котором будет [имя,расширение]
-    $fileExtension = strtolower(end(explode('.', $fileName)));
-
-   //тут мы рассматриваем, если элементов, разделенных точками больше двух
-    if (count(explode('.', $fileName))>2) {
-        $n = count(explode('.', $fileName))-2;
-        for ($i=0; $i==$n; $i++) {
-            $fileName .= explode('.', $fileName)[$i] . '.';
-        }
+    $files = array();
+    $diff = count($_FILES['file']) - count($_FILES['file'], COUNT_RECURSIVE);
+    if ($diff == 0) {
+        $files = array($_FILES['file']);
     } else {
-        $fileName = explode('.', $fileName)[0];
+        foreach($_FILES['file'] as $k => $l) {
+            foreach($l as $i => $v) {
+                $files[$i][$k] = $v;
+            }
+        }
     }
+    foreach ($files as $file) {
 
-    //замена всех цифр в файле на пустое место
-    $fileName = preg_replace('/[0-9]/', '', $fileName);
-    //массив допустимых разрешений
-    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+        $fileName = strval($file['name']);
+        $fileType = strval($file['name']);
+        $fileTmp_name = strval($file['tmp_name']);
+        $fileError = strval($file['error']);
+        $fileSize = strval($file['size']);
 
-    if (in_array($fileExtension, $allowedExtensions)) {
-        if ($fileSize < 5000000) {
-            if ($fileError == 0) {
-                $connection->query("INSERT INTO images (image, extension) VALUES ('$fileName', '$fileExtension') ");
+        //это массив, в котором будет [имя,расширение]
+        $fileExtension = strtolower(end(explode('.', $fileName)));
 
-                //тут мы выбираем последний добавленный айди
-                $lastId = $connection->query("SELECT MAX(id) FROM images");
-                $lastId = $lastId->fetch();
-                $lastId = $lastId[0];
-
-                //тут мы изменяем имя, добавляя айди перед именем
-                $fileNameNew = $lastId . $fileName . '.' . $fileExtension;
-                //тут указываем куда файл будет сохраняться
-                $fileDestination = 'uploads/' . $fileNameNew;
-                move_uploaded_file($fileTmp_name, $fileDestination);
-
-            } else {
-                echo 'Что-то пошло не так';
+        //тут мы рассматриваем, если элементов, разделенных точками больше двух
+        if (count(explode('.', $fileName)) > 2) {
+            $n = count(explode('.', $fileName)) - 2;
+            for ($i = 0; $i == $n; $i++) {
+                $fileName .= explode('.', $fileName)[$i] . '.';
             }
         } else {
-            echo 'Слишком большой размер файла';
+            $fileName = explode('.', $fileName)[0];
         }
-    } else {
-        echo 'Недоступное разрешение файла';
-    }
 
+        //замена всех цифр в файле на пустое место
+        $fileName = preg_replace('/[0-9]/', '', $fileName);
+        //массив допустимых разрешений
+        $allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+        if (in_array($fileExtension, $allowedExtensions)) {
+            if ($fileSize < 5000000) {
+                if ($fileError == 0) {
+                    $connection->query("INSERT INTO images (image, extension) VALUES ('$fileName', '$fileExtension') ");
+
+                    //тут мы выбираем последний добавленный айди
+                    $lastId = $connection->query("SELECT MAX(id) FROM images");
+                    $lastId = $lastId->fetch();
+                    $lastId = $lastId[0];
+
+                    //тут мы изменяем имя, добавляя айди перед именем
+                    $fileNameNew = $lastId . $fileName . '.' . $fileExtension;
+                    //тут указываем куда файл будет сохраняться
+                    $fileDestination = 'uploads/' . $fileNameNew;
+                    move_uploaded_file($fileTmp_name, $fileDestination);
+
+                } else {
+                    echo 'Что-то пошло не так';
+                }
+            } else {
+                echo 'Слишком большой размер файла';
+            }
+        } else {
+            echo 'Недоступное разрешение файла';
+        }
+    }
 }
 
 if ($_POST) {
@@ -140,7 +153,7 @@ if ($_POST['login']) {
 
 <!--тут мы добавляем файлы-->
 <form method="post" enctype="multipart/form-data">
-    <input type="file" name="file" required>
+    <input type="file" name="file[]" multiple required>
     <input type="submit" name="go">
 </form>
 
